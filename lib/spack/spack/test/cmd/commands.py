@@ -80,6 +80,7 @@ def test_rst():
     assert 'spack rm' in out2
     assert 'spack compiler add' in out2
 
+
 def test_rst_with_input_files(tmpdir):
     filename = tmpdir.join('file.rst')
     with filename.open('w') as f:
