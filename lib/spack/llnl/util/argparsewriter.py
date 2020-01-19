@@ -149,16 +149,18 @@ _rst_levels = ['=', '-', '^', '~', ':', '`']
 class ArgparseRstWriter(ArgparseWriter):
     """Write argparse output as rst sections."""
 
-    def __init__(self, prog, out=sys.stdout, rst_levels=_rst_levels):
+    def __init__(self, prog, out=sys.stdout, aliases=False,
+                 rst_levels=_rst_levels):
         """Create a new ArgparseRstWriter.
 
         Parameters:
             prog (str): program name
             out (file object): file to write to
+            aliases (bool): whether or not to include subparsers for aliases
             rst_levels (list of str): list of characters
                 for rst section headings
         """
-        super(ArgparseRstWriter, self).__init__(prog, out)
+        super(ArgparseRstWriter, self).__init__(prog, out, aliases)
         self.rst_levels = rst_levels
 
     def format(self, prog, description, usage,
@@ -255,16 +257,6 @@ class ArgparseRstWriter(ArgparseWriter):
 
 class ArgparseCompletionWriter(ArgparseWriter):
     """Write argparse output as shell programmable tab completion functions."""
-
-    def __init__(self, prog, out=sys.stdout, aliases=True):
-        """Initializes a new ArgparseWriter instance.
-
-        Parameters:
-            prog (str): the program name
-            out (file object): the file to write to
-            aliases (bool): whether or not to include subparsers for aliases
-        """
-        super(ArgparseCompletionWriter, self).__init__(prog, out, aliases)
 
     def format(self, prog, description, usage,
                positionals, optionals, subcommands):

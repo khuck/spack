@@ -18,6 +18,6 @@ do
     script=spack-completion.$shell
 
     rm -f $script
-    spack commands --format=$shell --header=$header --update=$script
+    spack commands --aliases --format=$shell --header=$header --update=$script
     chmod +x $script
 done

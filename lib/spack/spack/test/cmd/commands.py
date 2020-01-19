@@ -21,30 +21,64 @@ parser = spack.main.make_argument_parser()
 spack.main.add_all_commands(parser)
 
 
-def test_commands_by_name():
+def test_names():
     """Test default output of spack commands."""
-    out1 = commands()
-    assert out1.strip().split('\n') == sorted(spack.cmd.all_commands())
+    out1 = commands().strip().split('\n')
+    assert out1 == spack.cmd.all_commands()
+    assert 'rm' not in out1
 
-    out2 = commands('--format=names')
-    assert out1 == out2
+    out2 = commands('--aliases').strip().split('\n')
+    assert out1 != out2
+    assert 'rm' in out2
+
+    out3 = commands('--format=names').strip().split('\n')
+    assert out1 == out3
 
 
 def test_subcommands():
     """Test subcommand traversal."""
-    out = commands('--format=subcommands')
-    assert 'spack mirror create' in out
-    assert 'spack buildcache list' in out
-    assert 'spack repo add' in out
-    assert 'spack pkg diff' in out
-    assert 'spack url parse' in out
-    assert 'spack view symlink' in out
+    out1 = commands('--format=subcommands')
+    assert 'spack mirror create' in out1
+    assert 'spack buildcache list' in out1
+    assert 'spack repo add' in out1
+    assert 'spack pkg diff' in out1
+    assert 'spack url parse' in out1
+    assert 'spack view symlink' in out1
+    assert 'spack rm' not in out1
+    assert 'spack compiler add' not in out1
+
+    out2 = commands('--aliases', '--format=subcommands')
+    assert 'spack mirror create' in out2
+    assert 'spack buildcache list' in out2
+    assert 'spack repo add' in out2
+    assert 'spack pkg diff' in out2
+    assert 'spack url parse' in out2
+    assert 'spack view symlink' in out2
+    assert 'spack rm' in out2
+    assert 'spack compiler add' in out2
 
 
 def test_rst():
     """Do some simple sanity checks of the rst writer."""
-    commands('--format=rst')
+    out1 = commands('--format=rst')
+    assert 'spack mirror create' in out1
+    assert 'spack buildcache list' in out1
+    assert 'spack repo add' in out1
+    assert 'spack pkg diff' in out1
+    assert 'spack url parse' in out1
+    assert 'spack view symlink' in out1
+    assert 'spack rm' not in out1
+    assert 'spack compiler add' not in out1
 
+    out2 = commands('--aliases', '--format=rst')
+    assert 'spack mirror create' in out2
+    assert 'spack buildcache list' in out2
+    assert 'spack repo add' in out2
+    assert 'spack pkg diff' in out2
+    assert 'spack url parse' in out2
+    assert 'spack view symlink' in out2
+    assert 'spack rm' in out2
+    assert 'spack compiler add' in out2
 
 def test_rst_with_input_files(tmpdir):
     filename = tmpdir.join('file.rst')
@@ -145,34 +179,39 @@ def test_no_pipe_error():
 
 def test_bash_completion():
     """Test the bash completion writer."""
-    out = commands('--format=bash')
+    out1 = commands('--format=bash')
 
     # Make sure header not included
-    assert '_bash_completion_spack () {' not in out
-    assert '_all_packages () {' not in out
+    assert '_bash_completion_spack () {' not in out1
+    assert '_all_packages () {' not in out1
 
     # Make sure subcommands appear
-    assert '_spack_remove () {' in out
-    assert '_spack_compiler_find () {' in out
+    assert '_spack_remove () {' in out1
+    assert '_spack_compiler_find () {' in out1
 
-    # Make sure aliases appear
-    assert '_spack_rm () {' in out
-    assert '_spack_compiler_add () {' in out
+    # Make sure aliases don't appear
+    assert '_spack_rm () {' not in out1
+    assert '_spack_compiler_add () {' not in out1
 
     # Make sure options appear
-    assert '-h --help' in out
+    assert '-h --help' in out1
 
     # Make sure subcommands are called
     for function in _positional_to_subroutine.values():
-        assert '"$(_{0})"'.format(function) in out
+        assert '"$(_{0})"'.format(function) in out1
+
+    out2 = commands('--aliases', '--format=bash')
+
+    # Make sure aliases appear
+    assert '_spack_rm () {' in out2
+    assert '_spack_compiler_add () {' in out2
 
 
 def test_updated_completion_scripts(tmpdir):
     """Make sure our shell tab completion scripts remain up-to-date."""
 
-    msg = ("It looks like your pull request involves updates to Spack's "
-           "command-line interface. Please update Spack's shell tab "
-           "completion scripts by running:\n\n"
+    msg = ("It looks like Spack's command-line interface has been modified. "
+           "Please update Spack's shell tab completion scripts by running:\n\n"
            "    share/spack/qa/update-completion-scripts.sh\n\n"
            "and adding the changed files to your pull request.")
 
@@ -183,6 +222,7 @@ def test_updated_completion_scripts(tmpdir):
         old_script = os.path.join(spack.paths.share_path, script)
         new_script = str(tmpdir.join(script))
 
-        commands('--format', shell, '--header', header, '--update', new_script)
+        commands('--aliases', '--format', shell,
+                 '--header', header, '--update', new_script)
 
         assert filecmp.cmp(old_script, new_script), msg

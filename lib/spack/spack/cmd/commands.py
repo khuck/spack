@@ -38,6 +38,8 @@ def formatter(func):
 
 def setup_parser(subparser):
     subparser.add_argument(
+        '-a', '--aliases', action='store_true', help='include command aliases')
+    subparser.add_argument(
         '--format', default='names', choices=formatters,
         help='format to be used to print the output (default: names)')
     subparser.add_argument(
@@ -54,10 +56,12 @@ def setup_parser(subparser):
 class SpackArgparseRstWriter(ArgparseRstWriter):
     """RST writer tailored for spack documentation."""
 
-    def __init__(self, prog, documented_commands, out=sys.stdout,
+    def __init__(self, prog, out=sys.stdout, aliases=False,
+                 documented_commands=[],
                  rst_levels=['-', '-', '^', '~', ':', '`']):
-        super(SpackArgparseRstWriter, self).__init__(prog, out, rst_levels)
-        self.documented = documented_commands if documented_commands else []
+        super(SpackArgparseRstWriter, self).__init__(
+            prog, out, aliases, rst_levels)
+        self.documented = documented_commands
 
     def usage(self, *args):
         string = super(SpackArgparseRstWriter, self).usage(*args)
@@ -141,7 +145,7 @@ class BashCompletionWriter(ArgparseCompletionWriter):
 def subcommands(args, out):
     parser = spack.main.make_argument_parser()
     spack.main.add_all_commands(parser)
-    writer = SubcommandWriter(parser.prog, out)
+    writer = SubcommandWriter(parser.prog, out, args.aliases)
     writer.write(parser)
 
 
@@ -192,13 +196,19 @@ def rst(args, out):
     out.write('\n')
 
     # print sections for each command and subcommand
-    writer = SpackArgparseRstWriter(parser.prog, documented_commands, out)
+    writer = SpackArgparseRstWriter(
+        parser.prog, out, args.aliases, documented_commands)
     writer.write(parser)
 
 
 @formatter
 def names(args, out):
-    colify(spack.cmd.all_commands(), output=out)
+    commands = spack.cmd.all_commands().copy()
+
+    if args.aliases:
+        commands.extend(spack.main.aliases.keys())
+
+    colify(commands, output=out)
 
 
 @formatter
@@ -206,7 +216,7 @@ def bash(args, out):
     parser = spack.main.make_argument_parser()
     spack.main.add_all_commands(parser)
 
-    writer = BashCompletionWriter(parser.prog, out)
+    writer = BashCompletionWriter(parser.prog, out, args.aliases)
     writer.write(parser)
 
 
