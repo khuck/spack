@@ -5,10 +5,11 @@
 
 from __future__ import print_function
 
-import sys
+import argparse
+import copy
 import os
 import re
-import argparse
+import sys
 
 import llnl.util.tty as tty
 from llnl.util.argparsewriter import (
@@ -203,7 +204,7 @@ def rst(args, out):
 
 @formatter
 def names(args, out):
-    commands = spack.cmd.all_commands().copy()
+    commands = copy.copy(spack.cmd.all_commands())
 
     if args.aliases:
         commands.extend(spack.main.aliases.keys())
