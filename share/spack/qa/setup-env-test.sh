@@ -40,7 +40,7 @@ unset SPACK_ENV
 set -u
 
 # Source setup-env.sh before tests
-.  "$SHARE_DIR/setup-env.sh"
+. "$SHARE_DIR/setup-env.sh"
 
 # Bash should expand aliases even when non-interactive
 if [ -n "${BASH:-}" ]; then

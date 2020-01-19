@@ -170,7 +170,10 @@ teardown () {
         trapped_error=false
     fi
 
-    cleanup
+    if type cleanup &> /dev/null
+    then
+        cleanup
+    fi
 
     echo
     echo "$success tests succeeded."
