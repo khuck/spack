@@ -64,7 +64,7 @@ pass () {
 #
 succeeds () {
     printf "'%s' succeeds ... " "$*"
-    output=$($* 2>&1)
+    output=$("$@" 2>&1)
     err="$?"
 
     if [ "$err" != 0 ]; then

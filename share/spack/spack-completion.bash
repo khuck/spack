@@ -189,7 +189,7 @@ _spack_completions () {
     _bash_completion_spack
 
     # Return the result
-    echo "${COMPREPLY[@]}"
+    echo "${COMPREPLY[@]:-}"
 }
 
 # Log the environment variables used
@@ -223,7 +223,7 @@ _pretty_print () {
     for arg in $@
     do
         local array=("${!arg}")
-        echo -n "$arg: ["
+        printf "$arg: ["
         printf   "'%s'" "${array[0]}"
         printf ", '%s'" "${array[@]:1}"
         echo "]"
