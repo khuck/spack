@@ -17,15 +17,15 @@ cyan='\033[1;36m'
 green='\033[1;32m'
 reset='\033[0m'
 
-echo_red () {
+echo_red() {
     printf "${red}$*${reset}\n"
 }
 
-echo_green () {
+echo_green() {
     printf "${green}$*${reset}\n"
 }
 
-echo_msg () {
+echo_msg() {
     printf "${cyan}$*${reset}\n"
 }
 
@@ -38,14 +38,14 @@ success=0
 errors=0
 
 # Print out a header for a group of tests.
-title () {
+title() {
     echo
     echo_msg "$@"
     echo_msg "---------------------------------"
 }
 
 # echo FAIL in red text; increment failures
-fail () {
+fail() {
     echo_red FAIL
     errors=$((errors+1))
 }
@@ -53,7 +53,7 @@ fail () {
 #
 # Echo SUCCESS in green; increment successes
 #
-pass () {
+pass() {
     echo_green SUCCESS
     success=$((success+1))
 }
@@ -62,7 +62,7 @@ pass () {
 # Run a command and suppress output unless it fails.
 # On failure, echo the exit code and output.
 #
-succeeds () {
+succeeds() {
     printf "'%s' succeeds ... " "$*"
     output=$("$@" 2>&1)
     err="$?"
@@ -85,7 +85,7 @@ succeeds () {
 # Run a command and suppress output unless it succeeds.
 # If the command succeeds, echo the output.
 #
-fails () {
+fails() {
     printf "'%s' fails ... " "$*"
     output=$("$@" 2>&1)
     err="$?"
@@ -109,7 +109,7 @@ fails () {
 # Suppresses output on success.
 # On failure, echo the exit code and output.
 #
-contains () {
+contains() {
     string="$1"
     shift
 
@@ -135,7 +135,7 @@ contains () {
 #
 # Ensure that a variable is set.
 #
-is_set () {
+is_set() {
     printf "'%s' is set ... " "$1"
     if eval "[ -z \${${1:-}+x} ]"; then
         fail
@@ -149,7 +149,7 @@ is_set () {
 # Ensure that a variable is not set.
 # Fails and prints the value of the variable if it is set.
 #
-is_not_set () {
+is_not_set() {
     printf "'%s' is not set ... " "$1"
     if eval "[ ! -z \${${1:-}+x} ]"; then
         fail
@@ -163,7 +163,7 @@ is_not_set () {
 #
 # Report the number of tests that succeeded and failed on exit.
 #
-teardown () {
+teardown() {
     if [ "$?" != 0 ]; then
         trapped_error=true
     else

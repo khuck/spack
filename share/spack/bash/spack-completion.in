@@ -38,7 +38,7 @@
 # See `man bash` for more details.
 
 # Bash programmable completion for Spack
-_bash_completion_spack () {
+_bash_completion_spack() {
     # In all following examples, let the cursor be denoted by brackets, i.e. []
 
     # For our purposes, flags should not affect tab completion. For instance,
@@ -119,55 +119,55 @@ _bash_completion_spack () {
 
 # Helper functions for subcommands
 
-_subcommands () {
+_subcommands() {
     spack commands
 }
 
-_all_packages () {
+_all_packages() {
     spack list
 }
 
-_all_resource_hashes () {
+_all_resource_hashes() {
     spack resource list --only-hashes
 }
 
-_installed_packages () {
+_installed_packages() {
     spack --color=never find --no-groups
 }
 
-_installed_compilers () {
+_installed_compilers() {
     spack compilers | egrep -v "^(-|=)"
 }
 
-_providers () {
+_providers() {
     spack providers
 }
 
-_mirrors () {
+_mirrors() {
     spack mirror list | awk '{print $1}'
 }
 
-_repos () {
+_repos() {
     spack repo list | awk '{print $1}'
 }
 
-_tests () {
+_tests() {
     spack test -l
 }
 
-_environments () {
+_environments() {
     spack env list
 }
 
-_keys () {
+_keys() {
     spack gpg list
 }
 
-_config_sections () {
+_config_sections() {
     echo "compilers mirrors repos packages modules config upstreams"
 }
 
-_extensions () {
+_extensions() {
     echo "aspell go-bootstrap go icedtea jdk kim-api lua matlab mofem-cephas octave openjdk perl python r ruby rust tcl yorick"
 }
 
@@ -175,7 +175,7 @@ _extensions () {
 
 # Function for unit testing tab completion
 # Syntax: _spack_completions spack install py-
-_spack_completions () {
+_spack_completions() {
     local COMP_CWORD COMP_LINE COMP_POINT COMP_WORDS COMPREPLY
 
     # Set each variable the way bash would
@@ -194,7 +194,7 @@ _spack_completions () {
 
 # Log the environment variables used
 # Syntax: _test_vars >> temp
-_test_vars () {
+_test_vars() {
     echo "-----------------------------------------------------"
     echo "Full line:                '$COMP_LINE'"
     echo
@@ -219,7 +219,7 @@ _test_vars () {
 
 # Pretty-prints one or more arrays
 # Syntax: _pretty_print array1[@] ...
-_pretty_print () {
+_pretty_print() {
     for arg in $@
     do
         local array=("${!arg}")
@@ -235,4 +235,3 @@ complete -o bashdefault -o default -F _bash_completion_spack spack
 # Spack commands
 #
 # Everything below here is auto-generated.
-

@@ -25,7 +25,7 @@ export SPACK_ROOT=$(cd "$QA_DIR/../../.." && pwd)
 #
 # We make that happen by defining the sh functions below.
 # -----------------------------------------------------------------------
-module () {
+module() {
     echo module "$@"
 }
 
@@ -53,7 +53,7 @@ title "Testing setup-env.sh with $_sp_shell"
 succeeds which spack
 
 # Mock cd command (intentionally define only AFTER setup-env.sh)
-cd () {
+cd() {
     echo cd "$@"
 }
 
@@ -73,7 +73,7 @@ spack env create spack_test_env
 test_env_location=$(spack location -e spack_test_env)
 
 # Ensure that we uninstall b on exit
-cleanup () {
+cleanup() {
     echo "Removing test environment before exiting."
     spack env deactivate 2>&1 > /dev/null
     spack env rm -y spack_test_env

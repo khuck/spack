@@ -305,7 +305,7 @@ class ArgparseCompletionWriter(ArgparseWriter):
             str: the function definition beginning
         """
         name = prog.replace('-', '_').replace(' ', '_')
-        return '_{0} () {{'.format(name)
+        return '\n_{0}() {{'.format(name)
 
     def end_function(self, prog=None):
         """Returns the syntax needed to end a function definition.
@@ -316,7 +316,7 @@ class ArgparseCompletionWriter(ArgparseWriter):
         Returns:
             str: the function definition ending
         """
-        return '}\n\n'
+        return '}\n'
 
     def body(self, positionals, optionals, subcommands):
         """Returns the body of the function.
