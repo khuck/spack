@@ -183,16 +183,16 @@ def test_bash_completion():
     out1 = commands('--format=bash')
 
     # Make sure header not included
-    assert '_bash_completion_spack () {' not in out1
-    assert '_all_packages () {' not in out1
+    assert '_bash_completion_spack() {' not in out1
+    assert '_all_packages() {' not in out1
 
     # Make sure subcommands appear
-    assert '_spack_remove () {' in out1
-    assert '_spack_compiler_find () {' in out1
+    assert '_spack_remove() {' in out1
+    assert '_spack_compiler_find() {' in out1
 
     # Make sure aliases don't appear
-    assert '_spack_rm () {' not in out1
-    assert '_spack_compiler_add () {' not in out1
+    assert '_spack_rm() {' not in out1
+    assert '_spack_compiler_add() {' not in out1
 
     # Make sure options appear
     assert '-h --help' in out1
@@ -204,8 +204,8 @@ def test_bash_completion():
     out2 = commands('--aliases', '--format=bash')
 
     # Make sure aliases appear
-    assert '_spack_rm () {' in out2
-    assert '_spack_compiler_add () {' in out2
+    assert '_spack_rm() {' in out2
+    assert '_spack_compiler_add() {' in out2
 
 
 def test_updated_completion_scripts(tmpdir):
