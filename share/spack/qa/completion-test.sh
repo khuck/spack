@@ -55,6 +55,24 @@ contains 'mpi' _spack_completions spack providers ''
 contains 'builtin' _spack_completions spack repo remove ''
 contains 'packages' _spack_completions spack config edit ''
 contains 'python' _spack_completions spack extensions ''
+contains 'hdf5' _spack_completions spack -d install ''
+contains 'hdf5' _spack_completions spack install -v ''
 
 # XFAIL: Fails for Python 2.6 because pkg_resources not found?
 #contains 'compilers.py' _spack_completions spack test ''
+
+title 'Testing debugging functions'
+COMP_LINE='spack install '
+COMP_POINT=${#COMP_LINE}
+COMP_WORDS=(spack install '')
+COMP_WORDS_NO_FLAGS=(spack install '')
+COMP_CWORD=2
+COMP_CWORD_NO_FLAGS=2
+subfunction=_spack_install
+cur=install
+prev=spack
+contains "['spack', 'install', '']" _pretty_print COMP_WORDS[@]
+list_options=true
+contains "'True'" _test_vars
+list_options=false
+contains "'False'" _test_vars

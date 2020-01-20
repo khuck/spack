@@ -108,7 +108,7 @@ _bash_completion_spack () {
 
     # Uncomment these lines to enable logging
     #local prev=${COMP_WORDS_NO_FLAGS[$COMP_CWORD_NO_FLAGS-1]}
-    #_test_vars
+    #_test_vars >> temp
 
     # Make sure function exists before calling it
     if [[ "$(type -t $subfunction)" == "function" ]]
@@ -193,28 +193,28 @@ _spack_completions () {
 }
 
 # Log the environment variables used
-# Syntax: _test_vars
+# Syntax: _test_vars >> temp
 _test_vars () {
-    echo "-----------------------------------------------------"             >> temp
-    echo "Full line:                '$COMP_LINE'"                            >> temp
-    echo                                                                     >> temp
-    echo "Word list w/ flags:       $(_pretty_print COMP_WORDS[@])"          >> temp
-    echo "# words w/ flags:         '${#COMP_WORDS[@]}'"                     >> temp
-    echo "Cursor index w/ flags:    '$COMP_CWORD'"                           >> temp
-    echo                                                                     >> temp
-    echo "Word list w/out flags:    $(_pretty_print COMP_WORDS_NO_FLAGS[@])" >> temp
-    echo "# words w/out flags:      '${#COMP_WORDS_NO_FLAGS[@]}'"            >> temp
-    echo "Cursor index w/out flags: '$COMP_CWORD_NO_FLAGS'"                  >> temp
-    echo                                                                     >> temp
-    echo "Subfunction:              '$subfunction'"                          >> temp
+    echo "-----------------------------------------------------"
+    echo "Full line:                '$COMP_LINE'"
+    echo
+    echo "Word list w/ flags:       $(_pretty_print COMP_WORDS[@])"
+    echo "# words w/ flags:         '${#COMP_WORDS[@]}'"
+    echo "Cursor index w/ flags:    '$COMP_CWORD'"
+    echo
+    echo "Word list w/out flags:    $(_pretty_print COMP_WORDS_NO_FLAGS[@])"
+    echo "# words w/out flags:      '${#COMP_WORDS_NO_FLAGS[@]}'"
+    echo "Cursor index w/out flags: '$COMP_CWORD_NO_FLAGS'"
+    echo
+    echo "Subfunction:              '$subfunction'"
     if $list_options
     then
-        echo "List options:             'True'"  >> temp
+        echo "List options:             'True'"
     else
-        echo "List options:             'False'" >> temp
+        echo "List options:             'False'"
     fi
-    echo "Current word:             '$cur'"  >> temp
-    echo "Previous word:            '$prev'" >> temp
+    echo "Current word:             '$cur'"
+    echo "Previous word:            '$prev'"
 }
 
 # Pretty-prints one or more arrays
