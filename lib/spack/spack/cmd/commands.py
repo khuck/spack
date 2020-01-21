@@ -81,21 +81,21 @@ class SubcommandWriter(ArgparseWriter):
 
 
 _positional_to_subroutine = {
-    'package': 'all_packages',
-    'spec': 'all_packages',
-    'filter': 'all_packages',
-    'installed': 'installed_packages',
-    'compiler': 'installed_compilers',
-    'section': 'config_sections',
-    'env': 'environments',
-    'extendable': 'extensions',
-    'keys': 'keys',
-    'help_command': 'subcommands',
-    'mirror': 'mirrors',
-    'virtual': 'providers',
-    'namespace': 'repos',
-    'hash': 'all_resource_hashes',
-    'pytest': 'tests',
+    'package': '_all_packages',
+    'spec': '_all_packages',
+    'filter': '_all_packages',
+    'installed': '_installed_packages',
+    'compiler': '_installed_compilers',
+    'section': '_config_sections',
+    'env': '_environments',
+    'extendable': '_extensions',
+    'keys': '_keys',
+    'help_command': '_subcommands',
+    'mirror': '_mirrors',
+    'virtual': '_providers',
+    'namespace': '_repos',
+    'hash': '_all_resource_hashes',
+    'pytest': '_tests',
 }
 
 
@@ -127,19 +127,20 @@ class BashCompletionWriter(ArgparseCompletionWriter):
 """.format(self.optionals(optionals))
 
     def positionals(self, positionals):
+        # If match found, return function name
         for positional in positionals:
             for key, value in _positional_to_subroutine.items():
                 if positional.startswith(key):
-                    return 'compgen -W "$(_{0})" -- "$cur"'.format(value)
+                    return value
 
-        # If no matches found, do nothing
-        return ':'
+        # If no matches found, return empty list
+        return 'SPACK_COMPREPLY=""'
 
     def optionals(self, optionals):
-        return 'compgen -W "{0}" -- "$cur"'.format(' '.join(optionals))
+        return 'SPACK_COMPREPLY="{0}"'.format(' '.join(optionals))
 
     def subcommands(self, subcommands):
-        return 'compgen -W "{0}" -- "$cur"'.format(' '.join(subcommands))
+        return 'SPACK_COMPREPLY="{0}"'.format(' '.join(subcommands))
 
 
 @formatter

@@ -84,8 +84,7 @@ _bash_completion_spack() {
     # which is true if the current word starts with '-' or if the cursor is
     # not at the end of the line.
     local list_options=false
-    if [[ "${COMP_WORDS[$COMP_CWORD]}" == -* || \
-          "$COMP_CWORD" -ne "${#COMP_WORDS[@]}-1" ]]
+    if [[ "${COMP_WORDS[$COMP_CWORD]}" == -* || "$COMP_CWORD" -ne "${#COMP_WORDS[@]}-1" ]]
     then
         list_options=true
     fi
@@ -113,62 +112,116 @@ _bash_completion_spack() {
     # Make sure function exists before calling it
     if [[ "$(type -t $subfunction)" == "function" ]]
     then
-        COMPREPLY=($($subfunction))
+        $subfunction
+        COMPREPLY=($(compgen -W "$SPACK_COMPREPLY" -- "$cur"))
     fi
 }
 
 # Helper functions for subcommands
+# Results of each query are cached via environment variables
 
 _subcommands() {
-    spack commands
+    if [[ -z "${SPACK_SUBCOMMANDS:-}" ]]
+    then
+        SPACK_SUBCOMMANDS="$(spack commands)"
+    fi
+    SPACK_COMPREPLY="$SPACK_SUBCOMMANDS"
 }
 
 _all_packages() {
-    spack list
+    if [[ -z "${SPACK_ALL_PACKAGES:-}" ]]
+    then
+        SPACK_ALL_PACKAGES="$(spack list)"
+    fi
+    SPACK_COMPREPLY="$SPACK_ALL_PACKAGES"
 }
 
 _all_resource_hashes() {
-    spack resource list --only-hashes
+    if [[ -z "${SPACK_ALL_RESOURCES_HASHES:-}" ]]
+    then
+        SPACK_ALL_RESOURCE_HASHES="$(spack resource list --only-hashes)"
+    fi
+    SPACK_COMPREPLY="$SPACK_ALL_RESOURCE_HASHES"
 }
 
 _installed_packages() {
-    spack --color=never find --no-groups
+    if [[ -z "${SPACK_INSTALLED_PACKAGES:-}" ]]
+    then
+        SPACK_INSTALLED_PACKAGES="$(spack --color=never find --no-groups)"
+    fi
+    SPACK_COMPREPLY="$SPACK_INSTALLED_PACKAGES"
 }
 
 _installed_compilers() {
-    spack compilers | egrep -v "^(-|=)"
+    if [[ -z "${SPACK_INSTALLED_COMPILERS:-}" ]]
+    then
+        SPACK_INSTALLED_COMPILERS="$(spack compilers | egrep -v "^(-|=)")"
+    fi
+    SPACK_COMPREPLY="$SPACK_INSTALLED_COMPILERS"
 }
 
 _providers() {
-    spack providers
+    if [[ -z "${SPACK_PROVIDERS:-}" ]]
+    then
+        SPACK_PROVIDERS="$(spack providers)"
+    fi
+    SPACK_COMPREPLY="$SPACK_PROVIDERS"
 }
 
 _mirrors() {
-    spack mirror list | awk '{print $1}'
+    if [[ -z "${SPACK_MIRRORS:-}" ]]
+    then
+        SPACK_MIRRORS="$(spack mirror list | awk '{print $1}')"
+    fi
+    SPACK_COMPREPLY="$SPACK_MIRRORS"
 }
 
 _repos() {
-    spack repo list | awk '{print $1}'
+    if [[ -z "${SPACK_REPOS:-}" ]]
+    then
+        SPACK_REPOS="$(spack repo list | awk '{print $1}')"
+    fi
+    SPACK_COMPREPLY="$SPACK_REPOS"
 }
 
 _tests() {
-    spack test -l
+    if [[ -z "${SPACK_TESTS:-}" ]]
+    then
+        SPACK_TESTS="$(spack test -l)"
+    fi
+    SPACK_COMPREPLY="$SPACK_TESTS"
 }
 
 _environments() {
-    spack env list
+    if [[ -z "${SPACK_ENVIRONMENTS:-}" ]]
+    then
+        SPACK_ENVIRONMENTS="$(spack env list)"
+    fi
+    SPACK_COMPREPLY="$SPACK_ENVIRONMENTS"
 }
 
 _keys() {
-    spack gpg list
+    if [[ -z "${SPACK_KEYS:-}" ]]
+    then
+        SPACK_KEYS="$(spack gpg list)"
+    fi
+    SPACK_COMPREPLY="$SPACK_KEYS"
 }
 
 _config_sections() {
-    echo "compilers mirrors repos packages modules config upstreams"
+    if [[ -z "${SPACK_CONFIG_SECTIONS:-}" ]]
+    then
+        SPACK_CONFIG_SECTIONS="compilers mirrors repos packages modules config upstreams"
+    fi
+    SPACK_COMPREPLY="$SPACK_CONFIG_SECTIONS"
 }
 
 _extensions() {
-    echo "aspell go-bootstrap go icedtea jdk kim-api lua matlab mofem-cephas octave openjdk perl python r ruby rust tcl yorick"
+    if [[ -z "${SPACK_EXTENSIONS:-}" ]]
+    then
+        SPACK_EXTENSIONS="aspell go-bootstrap go icedtea jdk kim-api lua matlab mofem-cephas octave openjdk perl python r ruby rust tcl yorick"
+    fi
+    SPACK_COMPREPLY="$SPACK_EXTENSIONS"
 }
 
 # Testing functions

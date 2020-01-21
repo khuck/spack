@@ -199,7 +199,7 @@ def test_bash_completion():
 
     # Make sure subcommands are called
     for function in _positional_to_subroutine.values():
-        assert '"$(_{0})"'.format(function) in out1
+        assert function in out1
 
     out2 = commands('--aliases', '--format=bash')
 
