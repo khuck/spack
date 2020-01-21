@@ -36,9 +36,6 @@ do
     # Test that completion with no args works
     succeeds _spack_completions ${line[*]} ''
 
-    # Run a second time to hit the caching stage
-    succeeds _spack_completions ${line[*]} ''
-
     # Test that completion with flags works
     contains '-h --help' _spack_completions ${line[*]} -
 done <<- EOF
