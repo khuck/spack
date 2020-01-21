@@ -52,23 +52,37 @@ contains 'mpi' _spack_completions spack providers ''
 contains 'builtin' _spack_completions spack repo remove ''
 contains 'packages' _spack_completions spack config edit ''
 contains 'python' _spack_completions spack extensions ''
-contains 'hdf5' _spack_completions spack -d install ''
+contains 'hdf5' _spack_completions spack -d install --jobs 8 ''
 contains 'hdf5' _spack_completions spack install -v ''
 
 # XFAIL: Fails for Python 2.6 because pkg_resources not found?
 #contains 'compilers.py' _spack_completions spack test ''
 
 title 'Testing debugging functions'
-COMP_LINE='spack install '
-COMP_POINT=${#COMP_LINE}
-COMP_WORDS=(spack install '')
-COMP_WORDS_NO_FLAGS=(spack install '')
+
+# This is a particularly tricky case that involves the following situation:
+#     `spack -d [] install `
+# Here, [] represents the cursor, which is in the middle of the line.
+# We should tab-complete optional flags for `spack`, not optional flags for
+# `spack install` or package names.
+COMP_LINE='spack -d  install '
+COMP_POINT=9
+COMP_WORDS=(spack -d install)
 COMP_CWORD=2
-COMP_CWORD_NO_FLAGS=2
-subfunction=_spack_install
-cur=install
-prev=spack
-contains "['spack', 'install', '']" _pretty_print COMP_WORDS[@]
+COMP_KEY=9
+COMP_TYPE=64
+
+_bash_completion_spack
+contains "--all-help" echo "${COMPREPLY[@]}"
+
+contains "['spack', '-d', 'install', '']" _pretty_print COMP_WORDS[@]
+
+# Set the rest of the intermediate variables manually
+COMP_WORDS_NO_FLAGS=(spack install)
+COMP_CWORD_NO_FLAGS=1
+subfunction=_spack
+cur=
+
 list_options=true
 contains "'True'" _test_vars
 list_options=false

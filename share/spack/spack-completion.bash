@@ -71,7 +71,7 @@ _bash_completion_spack() {
 
     # Since we have removed all words after COMP_CWORD, we can safely assume
     # that COMP_CWORD_NO_FLAGS is simply the index of the last element
-    local COMP_CWORD_NO_FLAGS=$(( ${#COMP_WORDS_NO_FLAGS[@]} - 1 ))
+    local COMP_CWORD_NO_FLAGS=$((${#COMP_WORDS_NO_FLAGS[@]} - 1))
 
     # There is no guarantee that the cursor is at the end of the command line
     # when tab completion is envoked. For example, in the following situation:
@@ -84,7 +84,7 @@ _bash_completion_spack() {
     # which is true if the current word starts with '-' or if the cursor is
     # not at the end of the line.
     local list_options=false
-    if [[ "${COMP_WORDS[$COMP_CWORD]}" == -* || "$COMP_CWORD" -ne "${#COMP_WORDS[@]}-1" ]]
+    if [[ "${COMP_WORDS[$COMP_CWORD]}" == -* || "$COMP_POINT" -ne "${#COMP_LINE}" ]]
     then
         list_options=true
     fi
@@ -105,8 +105,15 @@ _bash_completion_spack() {
 
     local cur=${COMP_WORDS_NO_FLAGS[$COMP_CWORD_NO_FLAGS]}
 
-    # Uncomment these lines to enable logging
-    #local prev=${COMP_WORDS_NO_FLAGS[$COMP_CWORD_NO_FLAGS-1]}
+    # If the cursor is in the middle of the line, like:
+    #     `spack -d [] install`
+    # COMP_WORDS will not contain the empty character, so we have to add it.
+    if [[ "${COMP_LINE:$COMP_POINT:1}" == " " ]]
+    then
+        cur=""
+    fi
+
+    # Uncomment this line to enable logging
     #_test_vars >> temp
 
     # Make sure function exists before calling it
@@ -229,14 +236,19 @@ _extensions() {
 # Function for unit testing tab completion
 # Syntax: _spack_completions spack install py-
 _spack_completions() {
-    local COMP_CWORD COMP_LINE COMP_POINT COMP_WORDS COMPREPLY
+    local COMP_CWORD COMP_KEY COMP_LINE COMP_POINT COMP_TYPE COMP_WORDS COMPREPLY
 
     # Set each variable the way bash would
     COMP_LINE="$*"
     COMP_POINT=${#COMP_LINE}
     COMP_WORDS=("$@")
-    [[ ${COMP_LINE[@]: -1} = ' ' ]] && COMP_WORDS+=('')
-    COMP_CWORD=$(( ${#COMP_WORDS[@]} - 1 ))
+    if [[ ${COMP_LINE: -1} == ' ' ]]
+    then
+        COMP_WORDS+=('')
+    fi
+    COMP_CWORD=$((${#COMP_WORDS[@]} - 1))
+    COMP_KEY=9    # ASCII 09: Horizontal Tab
+    COMP_TYPE=64  # ASCII 64: '@', to list completions if the word is not unmodified
 
     # Run Spack's tab completion function
     _bash_completion_spack
@@ -249,15 +261,23 @@ _spack_completions() {
 # Syntax: _test_vars >> temp
 _test_vars() {
     echo "-----------------------------------------------------"
-    echo "Full line:                '$COMP_LINE'"
+    echo "Variables set by bash:"
     echo
-    echo "Word list w/ flags:       $(_pretty_print COMP_WORDS[@])"
-    echo "# words w/ flags:         '${#COMP_WORDS[@]}'"
-    echo "Cursor index w/ flags:    '$COMP_CWORD'"
+    echo "COMP_LINE:                '$COMP_LINE'"
+    echo "# COMP_LINE:              '${#COMP_LINE}'"
+    echo "COMP_WORDS:               $(_pretty_print COMP_WORDS[@])"
+    echo "# COMP_WORDS:             '${#COMP_WORDS[@]}'"
+    echo "COMP_CWORD:               '$COMP_CWORD'"
+    echo "COMP_KEY:                 '$COMP_KEY'"
+    echo "COMP_POINT:               '$COMP_POINT'"
+    echo "COMP_TYPE:                '$COMP_TYPE'"
+    echo "COMP_WORDBREAKS:          '$COMP_WORDBREAKS'"
     echo
-    echo "Word list w/out flags:    $(_pretty_print COMP_WORDS_NO_FLAGS[@])"
-    echo "# words w/out flags:      '${#COMP_WORDS_NO_FLAGS[@]}'"
-    echo "Cursor index w/out flags: '$COMP_CWORD_NO_FLAGS'"
+    echo "Intermediate variables:"
+    echo
+    echo "COMP_WORDS_NO_FLAGS:      $(_pretty_print COMP_WORDS_NO_FLAGS[@])"
+    echo "# COMP_WORDS_NO_FLAGS:    '${#COMP_WORDS_NO_FLAGS[@]}'"
+    echo "COMP_CWORD_NO_FLAGS:      '$COMP_CWORD_NO_FLAGS'"
     echo
     echo "Subfunction:              '$subfunction'"
     if $list_options
@@ -267,7 +287,6 @@ _test_vars() {
         echo "List options:             'False'"
     fi
     echo "Current word:             '$cur'"
-    echo "Previous word:            '$prev'"
 }
 
 # Pretty-prints one or more arrays
