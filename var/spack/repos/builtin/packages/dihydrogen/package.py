@@ -67,7 +67,11 @@ class Dihydrogen(CMakePackage, CudaPackage):
     depends_on('mpi')
     depends_on('catch2', type='test')
 
-    depends_on('aluminum', when='+al ~cuda')
+    # Specify the correct version of Aluminum
+    depends_on('aluminum@0.4:0.4.99', when='@0.1:0.1.99 +al')
+    depends_on('aluminum@0.5:', when='@:0.0,0.2: +al')
+
+    # Add Aluminum variants
     depends_on('aluminum +cuda +nccl +ht +cuda_rma', when='+al +cuda')
 
     depends_on('cuda', when=('+cuda' or '+legacy'))
@@ -101,7 +105,7 @@ class Dihydrogen(CMakePackage, CudaPackage):
 
     generator = 'Ninja'
     depends_on('ninja', type='build')
-    depends_on('cmake@3.16.0:', type='build')
+    depends_on('cmake@3.17.0:', type='build')
 
     depends_on('py-breathe', type='build', when='+docs')
     depends_on('doxygen', type='build', when='+docs')
