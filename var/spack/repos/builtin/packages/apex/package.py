@@ -12,8 +12,7 @@ class Apex(CMakePackage):
 
     maintainers = ['khuck']
     homepage = "https://github.com/khuck/xpress-apex"
-    url      = "https://github.com/khuck/xpress-apex/archive/v2.2.0.tar.gz"
-    git      = "https://github.com/khuck/xpress-apex"
+    url      = "https://github.com/khuck/xpress-apex/archive/v2.3.1.tar.gz"
 
     version('develop', branch='develop')
     version('master', branch='master')
