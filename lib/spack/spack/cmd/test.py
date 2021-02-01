@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,7 +21,7 @@ import spack.report
 import spack.package
 
 description = "run spack's tests for an install"
-section = "administrator"
+section = "admin"
 level = "long"
 
 
@@ -333,6 +333,7 @@ def test_results(args):
     if names:
         test_suites = [spack.install_test.get_test_suite(name) for name
                        in names]
+        test_suites = list(filter(lambda ts: ts is not None, test_suites))
         if not test_suites:
             tty.msg('No test suite(s) found in test stage: {0}'
                     .format(', '.join(names)))

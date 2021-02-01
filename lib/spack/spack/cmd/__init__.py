@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -435,7 +435,7 @@ def display_specs(specs, args=None, **kwargs):
     out = ''
     if groups:
         for specs in iter_groups(specs, indent, all_headers):
-            out += format_list(specs)
+            output.write(format_list(specs))
     else:
         out = format_list(sorted(specs))
 

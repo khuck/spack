@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -20,6 +20,8 @@ class R(AutotoolsPackage):
     url = "https://cloud.r-project.org/src/base/R-3/R-3.4.3.tar.gz"
 
     extendable = True
+
+    maintainers = ['glennpj']
 
     version('4.0.3', sha256='09983a8a78d5fb6bc45d27b1c55f9ba5265f78fa54a55c13ae691f87c5bb9e0d')
     version('4.0.2', sha256='d3bceab364da0876625e4097808b42512395fdf41292f4915ab1fd257c1bbe75')
@@ -73,11 +75,12 @@ class R(AutotoolsPackage):
     depends_on('libtiff')
     depends_on('jpeg')
     depends_on('cairo+pdf')
-    depends_on('cairo+X', when='+X')
+    depends_on('cairo+X+gobject', when='+X')
     depends_on('cairo~X', when='~X')
     depends_on('pango')
     depends_on('pango+X', when='+X')
     depends_on('pango~X', when='~X')
+    depends_on('harfbuzz+graphite2', when='+X')
     depends_on('freetype')
     depends_on('tcl')
     depends_on('tk', when='+X')

@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -31,8 +31,9 @@ class Dihydrogen(CMakePackage, CudaPackage):
             description='Enable extra warnings and force tests to be enabled.')
     variant('half', default=False,
             description='Enable FP16 support on the CPU.')
-    variant('legacy', default=False,
-            description='Enable the legacy DistConv code branch.')
+    variant('distconv', default=False,
+            description='Support distributed convolutions: spatial, channel, '
+            'filter.')
     variant('nvshmem', default=False,
             description='Builds with support for NVSHMEM')
     variant('openmp', default=False,
@@ -65,6 +66,8 @@ class Dihydrogen(CMakePackage, CudaPackage):
             description='CUDA architecture',
             values=spack.variant.auto_or_any_combination_of(*cuda_arch_values))
 
+    conflicts('~cuda', when='+nvshmem')
+
     depends_on('mpi')
     depends_on('catch2', type='test')
 
@@ -74,6 +77,9 @@ class Dihydrogen(CMakePackage, CudaPackage):
 
     # Add Aluminum variants
     depends_on('aluminum +cuda +nccl +ht +cuda_rma', when='+al +cuda')
+
+    for arch in CudaPackage.cuda_arch_values:
+        depends_on('aluminum cuda_arch=%s' % arch, when='+al +cuda cuda_arch=%s' % arch)
 
     depends_on('cuda', when=('+cuda' or '+legacy'))
     depends_on('cudnn', when=('+cuda' or '+legacy'))
@@ -102,6 +108,9 @@ class Dihydrogen(CMakePackage, CudaPackage):
     # Legacy builds require cuda
     conflicts('~cuda', when='+legacy')
 
+    conflicts('+distconv', when='+half')
+    conflicts('+rocm', when='+half')
+
     depends_on('half', when='+half')
 
     generator = 'Ninja'
@@ -112,6 +121,8 @@ class Dihydrogen(CMakePackage, CudaPackage):
     depends_on('doxygen', type='build', when='+docs')
 
     depends_on('llvm-openmp', when='%apple-clang +openmp')
+
+    depends_on('nvshmem', when='+nvshmem')
 
     illegal_cuda_arch_values = [
         '10', '11', '12', '13',
@@ -134,7 +145,7 @@ class Dihydrogen(CMakePackage, CudaPackage):
             '-DCMAKE_INSTALL_MESSAGE:STRING=LAZY',
             '-DBUILD_SHARED_LIBS:BOOL=%s'      % ('+shared' in spec),
             '-DH2_ENABLE_CUDA=%s' % ('+cuda' in spec),
-            '-DH2_ENABLE_DISTCONV_LEGACY=%s' % ('+legacy' in spec),
+            '-DH2_ENABLE_DISTCONV_LEGACY=%s' % ('+distconv' in spec),
             '-DH2_ENABLE_OPENMP=%s' % ('+openmp' in spec),
             '-DH2_ENABLE_FP16=%s' % ('+half' in spec),
             '-DH2_ENABLE_HIP_ROCM=%s' % ('+rocm' in spec),

@@ -1,4 +1,4 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2021 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -7,7 +7,7 @@ import llnl.util.lang as lang
 import llnl.util.tty as tty
 
 
-class Umpire(CMakePackage, CudaPackage):
+class Umpire(CMakePackage, CudaPackage, ROCmPackage):
     """An application-focused API for memory management on NUMA & GPU
     architectures"""
 
@@ -61,16 +61,27 @@ class Umpire(CMakePackage, CudaPackage):
     depends_on('cmake@3.9:', when='+cuda', type='build')
 
     depends_on('blt', type='build')
+    depends_on('blt@0.3.7:', type='build', when='+rocm')
+
+    # variants +rocm and amdgpu_targets are not automatically passed to
+    # dependencies, so do it manually.
+    depends_on('camp+rocm', when='+rocm')
+    for val in ROCmPackage.amdgpu_targets:
+        depends_on('camp amdgpu_target=%s' % val, when='amdgpu_target=%s' % val)
+
     depends_on('camp')
 
     conflicts('+numa', when='@:0.3.2')
     conflicts('~c', when='+fortran', msg='Fortran API requires C API')
 
+    # device allocator exports device code, which requires static libs
+    # currently only available for cuda.
+    conflicts('+shared', when='+cuda')
+
     def cmake_args(self):
         spec = self.spec
 
         options = []
-
         options.append("-DBLT_SOURCE_DIR={0}".format(spec['blt'].prefix))
         options.append("-Dcamp_DIR={0}".format(spec['camp'].prefix))
 
@@ -89,6 +100,20 @@ class Umpire(CMakePackage, CudaPackage):
                 options.append('-DENABLE_DEVICE_CONST=On')
         else:
             options.append('-DENABLE_CUDA=Off')
+
+        if '+rocm' in spec:
+            options.extend([
+                '-DENABLE_HIP=ON',
+                '-DHIP_ROOT_DIR={0}'.format(spec['hip'].prefix)
+            ])
+            archs = self.spec.variants['amdgpu_target'].value
+            if archs != 'none':
+                arch_str = ",".join(archs)
+                options.append(
+                    '-DHIP_HIPCC_FLAGS=--amdgpu-target={0}'.format(arch_str)
+                )
+        else:
+            options.append('-DENABLE_HIP=OFF')
 
         options.append('-DENABLE_C={0}'.format(
             'On' if '+c' in spec else 'Off'))
