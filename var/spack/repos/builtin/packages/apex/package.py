@@ -13,9 +13,11 @@ class Apex(CMakePackage):
     maintainers = ['khuck']
     homepage = "https://github.com/khuck/xpress-apex"
     url      = "https://github.com/khuck/xpress-apex/archive/v2.3.1.tar.gz"
+    git      = "https://github.com/khuck/xpress-apex"
 
     version('develop', branch='develop')
     version('master', branch='master')
+    version('2.3.2', sha256='acf37c024a2283cafbf206f508929208b62c8f800af22ad7c74c570863a31bb4')
     version('2.3.1', sha256='86bf6933f2c53531fcb24cda9fc7dc9919909bed54740d1e0bc3e7ce6ed78091')
     version('2.3.0', sha256='7e1d16c9651b913c5e28abdbad75f25c55ba25e9fa35f5d979c1d3f9b9852c58')
     version('2.2.0', sha256='cd5eddb1f6d26b7dbb4a8afeca2aa28036c7d0987e0af0400f4f96733889c75c')
@@ -44,15 +46,15 @@ class Apex(CMakePackage):
     variant('examples', default=False, description='Build Examples')
 
     # Dependencies
-    depends_on('cmake', type='build')
-    depends_on('binutils+libiberty+headers', when='+binutils')
+    depends_on('cmake@3.10.0:', type='build')
+    depends_on('binutils@2.33:+libiberty+headers', when='+binutils')
     depends_on('activeharmony@4.6:', when='+activeharmony')
     depends_on('activeharmony@4.6:', when='+plugins')
-    depends_on('otf2', when='+otf2')
+    depends_on('otf2@2.1:', when='+otf2')
     depends_on('mpi', when='+mpi')
     depends_on('gperftools', when='+gperftools')
     depends_on('jemalloc', when='+jemalloc')
-    depends_on('papi', when='+papi')
+    depends_on('papi@5.7.0:', when='+papi')
     depends_on('cuda', when='+cuda')
     depends_on('boost@1.54:', when='+boost')
 
@@ -70,74 +72,41 @@ class Apex(CMakePackage):
             prefix = 'USE'
             test_prefix = ''
 
-        if '+cuda' in spec:
-            args.append('-DAPEX_WITH_CUDA=TRUE')
-        else:
-            args.append('-DAPEX_WITH_CUDA=FALSE')
-
-        if '+binutils' in spec:
-            args.append('-DBFD_ROOT={0}'.format(spec['binutils'].prefix))
-            args.append('-D' + prefix + '_BFD=TRUE')
-        else:
-            args.append('-D' + prefix + '_BFD=FALSE')
+        args.append(self.define_from_variant(prefix + '_ACTIVEHARMONY', 'activeharmony'))
+        args.append(self.define_from_variant(prefix + '_BFD', 'binutils'))
+        args.append(self.define_from_variant('APEX_WITH_CUDA', 'cuda'))
+        args.append(self.define_from_variant(prefix + '_MPI', 'mpi'))
+        args.append(self.define_from_variant(prefix + '_OMPT', 'openmp'))
+        args.append(self.define_from_variant(prefix + '_OTF2', 'otf2'))
+        args.append(self.define_from_variant(prefix + '_PAPI', 'papi'))
+        args.append(self.define_from_variant(prefix + '_PLUGINS', 'plugins'))
+        args.append(self.define_from_variant(prefix + '_LM_SENSORS', 'lmsensors'))
+        args.append(self.define_from_variant(prefix + '_TCMALLOC', 'gperftools'))
+        args.append(self.define_from_variant(prefix + '_JEMALLOC', 'jemalloc'))
+        args.append(self.define_from_variant(test_prefix + 'BUILD_TESTS', 'tests'))
+        args.append(self.define_from_variant(test_prefix + 'BUILD_EXAMPLES', 'examples'))
 
         if '+activeharmony' in spec:
             args.append('-DACTIVEHARMONY_ROOT={0}'.format(
                 spec['activeharmony'].prefix))
-            args.append('-D' + prefix + '_ACTIVEHARMONY=TRUE')
-        else:
-            args.append('-D' + prefix + '_ACTIVEHARMONY=FALSE')
 
-        if '+plugins' in spec:
-            args.append('-D' + prefix + '_PLUGINS=TRUE')
-        else:
-            args.append('-D' + prefix + '_PLUGINS=FALSE')
-
-        if '+lmsensors' in spec:
-            args.append('-D' + prefix + '_LM_SENSORS=TRUE')
-        else:
-            args.append('-D' + prefix + '_LM_SENSORS=FALSE')
-
-        if '+mpi' in spec:
-            args.append('-D' + prefix + '_MPI=TRUE')
-        else:
-            args.append('-D' + prefix + '_MPI=FALSE')
+        if '+binutils' in spec:
+            args.append('-DBFD_ROOT={0}'.format(spec['binutils'].prefix))
 
         if '+otf2' in spec:
             args.append('-DOTF2_ROOT={0}'.format(spec['otf2'].prefix))
-            args.append('-D' + prefix + '_OTF2=TRUE')
-        else:
-            args.append('-D' + prefix + '_OTF2=FALSE')
 
-        if '+openmp' in spec:
-            args.append('-D' + prefix + '_OMPT=TRUE')
-        else:
-            args.append('-D' + prefix + '_OMPT=FALSE')
+        if '+papi' in spec:
+            args.append('-DPAPI_ROOT={0}'.format(spec['papi'].prefix))
 
         if '+gperftools' in spec:
             args.append('-DGPERFTOOLS_ROOT={0}'.format(
                 spec['gperftools'].prefix))
-            args.append('-D' + prefix + '_TCMALLOC=TRUE')
-        else:
-            args.append('-D' + prefix + '_TCMALLOC=FALSE')
 
         if '+jemalloc' in spec:
             args.append('-DJEMALLOC_ROOT={0}'.format(spec['jemalloc'].prefix))
-            args.append('-D' + prefix + '_JEMALLOC=TRUE')
-        else:
-            args.append('-D' + prefix + '_JEMALLOC=FALSE')
 
         if '+boost' in spec:
             args.append('-DBOOST_ROOT={0}'.format(spec['boost'].prefix))
-
-        if '+tests' in spec:
-            args.append('-D' + test_prefix + 'BUILD_TESTS=TRUE')
-        else:
-            args.append('-D' + test_prefix + 'BUILD_TESTS=FALSE')
-
-        if '+examples' in spec:
-            args.append('-D' + test_prefix + 'BUILD_EXAMPLES=TRUE')
-        else:
-            args.append('-D' + test_prefix + 'BUILD_EXAMPLES=FALSE')
 
         return args
