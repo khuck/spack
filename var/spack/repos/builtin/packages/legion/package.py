@@ -25,8 +25,16 @@ class Legion(CMakePackage, ROCmPackage):
     homepage = "https://legion.stanford.edu/"
     git = "https://github.com/StanfordLegion/legion.git"
 
-    maintainers("pmccormick", "streichler")
+    maintainers("pmccormick", "streichler", "elliottslaughter")
     tags = ["e4s"]
+    version("23.03.0", tag="legion-23.03.0")
+    version("22.12.0", tag="legion-22.12.0")
+    version("22.09.0", tag="legion-22.09.0")
+    version("22.06.0", tag="legion-22.06.0")
+    version("22.03.0", tag="legion-22.03.0")
+    version("21.12.0", tag="legion-21.12.0")
+    version("21.09.0", tag="legion-21.09.0")
+    version("21.06.0", tag="legion-21.06.0")
     version("21.03.0", tag="legion-21.03.0")
     version("stable", branch="stable")
     version("master", branch="master")
@@ -61,6 +69,9 @@ class Legion(CMakePackage, ROCmPackage):
 
     depends_on("kokkos@3.3.01:~cuda", when="+kokkos~cuda")
     depends_on("kokkos@3.3.01:~cuda+openmp", when="+kokkos+openmp")
+
+    # https://github.com/spack/spack/issues/37232#issuecomment-1553376552
+    patch("hip-offload-arch.patch", when="@23.03.0 +rocm")
 
     # HIP specific
     variant(
@@ -146,10 +157,11 @@ class Legion(CMakePackage, ROCmPackage):
     )
     conflicts("gasnet_root", when="network=mpi")
 
+    gasnet_conduits = ["aries", "ibv", "udp", "mpi", "ucx", "ofi-slingshot11"]
     variant(
         "conduit",
         default="none",
-        values=("aries", "ibv", "udp", "mpi", "ucx", "none"),
+        values=gasnet_conduits + ["none"],
         description="The gasnet conduit(s) to enable.",
         multi=False,
     )
@@ -160,7 +172,6 @@ class Legion(CMakePackage, ROCmPackage):
         msg="a conduit must be selected when 'network=gasnet'",
     )
 
-    gasnet_conduits = ("aries", "ibv", "udp", "mpi", "ucx")
     for c in gasnet_conduits:
         conflict_str = "conduit=%s" % c
         conflicts(
@@ -266,11 +277,12 @@ class Legion(CMakePackage, ROCmPackage):
         default=512,
         description="Maximum number of fields allowed in a logical region.",
     )
+    depends_on("cray-pmi", when="conduit=ofi-slingshot11 ^cray-mpich")
 
     def setup_build_environment(self, build_env):
         spec = self.spec
         if "+rocm" in spec:
-            build_env.set("HIP_PATH", spec["hip"].prefix)
+            build_env.set("HIP_PATH", "{0}/hip".format(spec["hip"].prefix))
 
     def cmake_args(self):
         spec = self.spec
@@ -289,7 +301,13 @@ class Legion(CMakePackage, ROCmPackage):
                 options.append("-DLegion_EMBED_GASNet_LOCALSRC=%s" % gasnet_dir)
 
             gasnet_conduit = spec.variants["conduit"].value
-            options.append("-DGASNet_CONDUIT=%s" % gasnet_conduit)
+
+            if "-" in gasnet_conduit:
+                gasnet_conduit, gasnet_system = gasnet_conduit.split("-")
+                options.append("-DGASNet_CONDUIT=%s" % gasnet_conduit)
+                options.append("-DGASNet_SYSTEM=%s" % gasnet_system)
+            else:
+                options.append("-DGASNet_CONDUIT=%s" % gasnet_conduit)
 
             if "+gasnet_debug" in spec:
                 options.append("-DLegion_EMBED_GASNet_CONFIGURE_ARGS=--enable-debug")
