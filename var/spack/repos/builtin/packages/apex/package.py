@@ -97,13 +97,14 @@ class Apex(CMakePackage):
     variant("lmsensors", default=False, description="Enables LM-Sensors support")
     variant("mpi", default=False, description="Enables MPI support")
     variant("starpu", default=False, description="Enables StarPU support")
+    variant("opencl", default=False, description="Enables OpenCL support")
     variant("tests", default=False, description="Build Unit Tests")
     variant("examples", default=False, description="Build Examples")
 
     # Dependencies
     depends_on("zlib-api")
-    depends_on("cmake@3.10.0:", type="build")
-    depends_on("kokkos", type="build", when="+kokkos")
+    depends_on("cmake@3.20.1:", type="build")
+    depends_on("kokkos+pic", type="build", when="+kokkos")
     depends_on("binutils@2.33:+libiberty+headers", when="+binutils")
     depends_on("gettext", when="+binutils ^binutils+nls")
     depends_on("activeharmony@4.6:", when="+activeharmony")
@@ -135,6 +136,11 @@ class Apex(CMakePackage):
     # https://github.com/UO-OACISS/apex/issues/180.
     conflicts("~kokkos", when="@:2.6.5")
 
+    # OpenCL added with 2.7.0
+    conflicts("+opencl", when="@:2.6.5")
+    # Disable OpenCL when using SYCL support
+    conflicts("+opencl", when="+sycl")
+
     # Patches
 
     # This patch ensures that the missing dependency_tree.hpp header is
@@ -156,6 +162,7 @@ class Apex(CMakePackage):
         args.append(self.define_from_variant("APEX_WITH_CUDA", "cuda"))
         args.append(self.define_from_variant("APEX_WITH_HIP", "hip"))
         args.append(self.define_from_variant("APEX_WITH_LEVEL0", "sycl"))
+        args.append(self.define_from_variant("APEX_WITH_OPENCL", "opencl"))
         args.append(self.define_from_variant(prefix + "_MPI", "mpi"))
         args.append(self.define_from_variant(prefix + "_OMPT", "openmp"))
         args.append(self.define_from_variant(prefix + "_OTF2", "otf2"))
