@@ -59,6 +59,9 @@ class Ruby(AutotoolsPackage, NMakePackage):
             with when("+openssl"):
                 depends_on("openssl@:1")
                 depends_on("openssl@:1.0", when="@:2.3")
+                depends_on("openssl@1:1.1", when="@:2.7")
+                depends_on("openssl@1.1:", when="@3.1:")
+                depends_on("openssl")
             with when("+yjit"):
                 depends_on("rust@1.58:")
 
