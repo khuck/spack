@@ -18,6 +18,7 @@ class Apex(CMakePackage):
 
     version("develop", branch="develop")
     version("master", branch="master")
+    version("2.7.1", sha256="5a31f5d790908e3b266e85abd03ea6affef8001c1276f8b883a55fda7a213aae")
     version("2.7.0", sha256="81cd7e8dbea35cec2360d6404e20f7527f66410614f06a73c8c782ac2cfdb0b0")
     version("2.6.5", sha256="2ba29a1198c904ac209fc6bc02962304a1416443b249f34ef96889aff39644ce")
     version("2.6.4", sha256="281a673f447762a488577beaa60e48d88cb6354f220457cf8f05c1de2e1fce70")
@@ -104,7 +105,7 @@ class Apex(CMakePackage):
     # Dependencies
     depends_on("zlib-api")
     depends_on("cmake@3.20.1:", type="build")
-    depends_on("kokkos+pic", type="build", when="+kokkos")
+    depends_on("kokkos+pic+tuning", type="build", when="+kokkos")
     depends_on("binutils@2.33:+libiberty+headers", when="+binutils")
     depends_on("gettext", when="+binutils ^binutils+nls")
     depends_on("activeharmony@4.6:", when="+activeharmony")
